@@ -6,33 +6,23 @@
 
     public class SessionComponent : MonoBehaviour
     {
-        [Tooltip("config")]
-        public ARConfigBase Config;
+        [Tooltip("config")] public ARConfigBase Config;
 
+        private bool isFirstConnect = true;
+        private bool isSessionCreated;
+        private bool isErrorHappendWhenInit;
+        public static bool isEnableMask;
+        private string errorMessage;
 
-        private bool isFirstConnect = true;//this is used to avoid multiple permission request when it was rejected
-        private bool isSessionCreated =false;
-        private bool isErrorHappendWhenInit = false;
-
-        public static bool isEnableMask = false;
-
-        private string errorMessage = null;
         private void Awake()
         {
             Screen.sleepTimeout = SleepTimeout.NeverSleep;
         }
 
-        private void Start()
-        {
-            //Init();
-        }
+        bool installRequested;
 
-        bool installRequested = false;
         void Init()
         {
-            //If you do not want to switch engines, AREnginesSelector is useless.
-            // You just need to use AREnginesApk.Instance.requestInstall() and the default engine
-            // is Huawei AR Engine.
             AREnginesAvaliblity ability = AREnginesSelector.Instance.CheckDeviceExecuteAbility();
             if ((AREnginesAvaliblity.HUAWEI_AR_ENGINE & ability) != 0)
             {
@@ -40,11 +30,10 @@
             }
             else
             {
-                errorMessage ="This device does not support AR Engine. Exit.";
+                errorMessage = "This device does not support AR Engine. Exit.";
                 Invoke("_DoQuit", 0.5f);
                 return;
             }
-
             try
             {
                 switch (AREnginesApk.Instance.RequestInstall(!installRequested))
@@ -55,29 +44,28 @@
                     case ARInstallStatus.INSTALLED:
                         break;
                 }
-
             }
             catch (ARUnavailableConnectServerTimeOutException e)
             {
-                errorMessage ="Network is not available, retry later!";
+                errorMessage = "Network is not available, retry later!";
                 Invoke("_DoQuit", 0.5f);
                 return;
             }
             catch (ARUnavailableDeviceNotCompatibleException e)
             {
-                errorMessage ="This Device does not support AR!";
+                errorMessage = "This Device does not support AR!";
                 Invoke("_DoQuit", 0.5f);
                 return;
             }
             catch (ARUnavailableEmuiNotCompatibleException e)
             {
-                errorMessage ="This EMUI does not support AR!";
+                errorMessage = "This EMUI does not support AR!";
                 Invoke("_DoQuit", 0.5f);
                 return;
             }
             catch (ARUnavailableUserDeclinedInstallationException e)
             {
-                errorMessage ="User decline installation right now, quit";
+                errorMessage = "User decline installation right now, quit";
                 Invoke("_DoQuit", 0.5f);
                 return;
             }
@@ -86,12 +74,12 @@
                 _Connect();
                 isFirstConnect = false;
             }
-
             if (Config != null)
             {
                 isEnableMask = Config.EnableMask;
             }
         }
+
         public void Update()
         {
             _AppQuitOnEscape();
@@ -99,7 +87,6 @@
             //This function must be called before other Components' Update to ensure the accuracy of AREngine
             ARSession.Update();
         }
-
 
         public void OnApplicationPause(bool isPaused)
         {
@@ -124,7 +111,7 @@
                 catch (ARCameraPermissionDeniedException e)
                 {
                     ARDebug.LogError("camera permission is denied");
-                    errorMessage="This app require camera permission";
+                    errorMessage = "This app require camera permission";
                     Invoke("_DoQuit", 0.5f);
                 }
             }
@@ -156,12 +143,12 @@
                 else
                 {
                     ARDebug.LogError("connection failed because a needed permission was rejected.");
-                    errorMessage="This app require camera permission";
+                    errorMessage = "This app require camera permission";
                     Invoke("_DoQuit", 0.5f);
-                    return;
                 }
             });
         }
+
         private void _ConnectToService()
         {
             try
@@ -177,31 +164,31 @@
             {
                 isErrorHappendWhenInit = true;
                 ARDebug.LogError("camera permission is denied");
-                errorMessage="This app require camera permission";
+                errorMessage = "This app require camera permission";
                 Invoke("_DoQuit", 0.5f);
             }
-            catch (ARUnavailableDeviceNotCompatibleException e)
+            catch (ARUnavailableDeviceNotCompatibleException)
             {
                 isErrorHappendWhenInit = true;
-                errorMessage="This device does not support AR";
+                errorMessage = "This device does not support AR";
                 Invoke("_DoQuit", 0.5f);
             }
-            catch (ARUnavailableServiceApkTooOldException e)
+            catch (ARUnavailableServiceApkTooOldException)
             {
                 isErrorHappendWhenInit = true;
-                errorMessage="This AR Engine is too old, please update";
+                errorMessage = "This AR Engine is too old, please update";
                 Invoke("_DoQuit", 0.5f);
             }
             catch (ARUnavailableServiceNotInstalledException e)
             {
                 isErrorHappendWhenInit = true;
-                errorMessage="This app depend on AREngine.apk, please install it";
+                errorMessage = "This app depend on AREngine.apk, please install it";
                 Invoke("_DoQuit", 0.5f);
             }
-            catch(ARUnSupportedConfigurationException e)
+            catch (ARUnSupportedConfigurationException e)
             {
                 isErrorHappendWhenInit = true;
-                errorMessage="This config is not supported on this device, exit now.";
+                errorMessage = "This config is not supported on this device, exit now.";
                 Invoke("_DoQuit", 0.5f);
             }
         }
@@ -226,7 +213,7 @@
             bb.normal.textColor = new Color(1, 0, 0);
             bb.fontSize = 45;
 
-            GUI.Label(new Rect(0, Screen.height-100, 200, 200), errorMessage, bb);
+            GUI.Label(new Rect(0, Screen.height - 100, 200, 200), errorMessage, bb);
         }
     }
 }

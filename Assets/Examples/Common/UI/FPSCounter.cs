@@ -1,21 +1,19 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class FPSCounter : MonoBehaviour
 {
     public float updateInterval = 0.5F;
     private double lastInterval;
-    private int frames = 0;
+    private int frames;
     private float fps;
-    // Use this for initialization
+
+
     void Start()
     {
         lastInterval = Time.realtimeSinceStartup;
         frames = 0;
     }
 
-    // Update is called once per frame
     void Update()
     {
         ++frames;
@@ -35,8 +33,7 @@ public class FPSCounter : MonoBehaviour
         bb.normal.textColor = new Color(1, 0, 0);
         bb.fontSize = 50;
 
-        GUI.Label(new Rect(Screen.width-250, 0, 200, 200), string.Format("fps:{0}", fps.ToString("n")), bb);
-
+        GUI.Label(new Rect(Screen.width - 250, 0, 200, 200), string.Format("fps:{0}", fps.ToString("n")), bb);
     }
 
 }

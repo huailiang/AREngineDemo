@@ -1,8 +1,9 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
-public class CustomRenderPassFeature : ScriptableRendererFeature
+public class ARBackgroundRenderPassFeature : ScriptableRendererFeature
 {
     
     [System.Serializable]
@@ -40,7 +41,7 @@ public class CustomRenderPassFeature : ScriptableRendererFeature
             if (_settings.material != null)
             {
                 CommandBuffer cmd = CommandBufferPool.Get();
-                cmd.Blit(_settings.material.mainTexture, BuiltinRenderTextureType.CurrentActive);
+                cmd.Blit(_settings.material.mainTexture, BuiltinRenderTextureType.CurrentActive, _settings.material);
                 context.ExecuteCommandBuffer(cmd);
                 cmd.Clear();
                 CommandBufferPool.Release(cmd);
@@ -55,7 +56,7 @@ public class CustomRenderPassFeature : ScriptableRendererFeature
 
     CustomRenderPass m_ScriptablePass;
     public Settings settings = new Settings();
-
+    
     /// <inheritdoc/>
     public override void Create()
     {
