@@ -2,54 +2,48 @@
 {
     Properties {
         _MainTex ("Texture", 2D) = "white" {}
-		_UvLeftTopBottom ("UV of left corners",Vector) = (0,1,0,0)
-		_UvRightTopBottom ("UV of right corners",Vector) = (1,1,1,0)
     }
 	
-    // For GLES3
     SubShader
     {
+         Tags { "RenderType"="Opaque" "LightMode"="ForwardBase"}
+
         Pass
         {
             ZWrite Off
 
             GLSLPROGRAM
-
-            #pragma only_renderers gles3
+            #include "UnityCG.glslinc"
+            uniform vec4 _MainTex_ST;
 
             #ifdef SHADER_API_GLES3
+            #pragma only_renderers gles3
             #extension GL_OES_EGL_image_external_essl3 : require
             #endif
 
-            uniform vec4 _UvLeftTopBottom;
-            uniform vec4 _UvRightTopBottom;
-
             #ifdef VERTEX
-
-            varying vec2 textureCoord;
-
+            out vec2 textureCoord;
             void main()
             {
-                #ifdef SHADER_API_GLES3
-                vec2 uvLeft = mix(_UvLeftTopBottom.xy, _UvLeftTopBottom.zw, gl_MultiTexCoord0.y);
-                vec2 uvRight = mix(_UvRightTopBottom.xy, _UvRightTopBottom.zw, gl_MultiTexCoord0.y);
-                textureCoord = mix(uvLeft, uvRight, gl_MultiTexCoord0.x);
-
-                gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
-                #endif
+                 gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+                textureCoord = TRANSFORM_TEX_ST(gl_MultiTexCoord0, _MainTex_ST).yx;
+                textureCoord.xy = 1.0 - textureCoord.xy;
             }
-
             #endif
 
             #ifdef FRAGMENT
-            varying vec2 textureCoord;
+            in vec2 textureCoord;
+            
+             #ifdef SHADER_API_GLES3
             uniform samplerExternalOES _MainTex;
+            #else
+            uniform sampler2D _MainTex;
+            #endif
 
             void main()
             {
-                #ifdef SHADER_API_GLES3
-                gl_FragColor = texture(_MainTex, textureCoord);
-                #endif
+                vec4 color = texture2D(_MainTex, textureCoord);
+                gl_FragColor = color;
             }
 
             #endif
@@ -58,5 +52,4 @@
         }
     }
 
-    FallBack Off
 }
