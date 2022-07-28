@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c41ebfd2ee1849d4889d3feab0893698, type: 3}
-  m_Name: NewARBackgroundRenderPassFeature
+  m_Name: ARBackgroundRenderPassFeature
   m_EditorClassIdentifier: 
   m_Active: 1
   settings:
